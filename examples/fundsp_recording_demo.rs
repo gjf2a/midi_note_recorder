@@ -10,7 +10,7 @@ use midi_fundsp::{
     io::{choose_midi_device, start_midi_input_thread, start_output_thread, Speaker, SynthMsg},
     sounds::options,
 };
-use midi_msg::{MidiMsg, SystemRealTimeMsg};
+use midi_msg::MidiMsg;
 use midi_note_recorder::Recording;
 use midir::MidiInput;
 use read_input::{shortcut::input, InputBuild};

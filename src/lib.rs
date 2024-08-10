@@ -1,5 +1,5 @@
 use std::{
-    collections::{BTreeSet, VecDeque},
+    collections::VecDeque,
     sync::Arc,
     time::Instant,
 };
@@ -60,7 +60,11 @@ impl Recording {
         }
     }
 
-    pub fn playback_loop(&self, outgoing: Arc<SegQueue<MidiMsg>>) {
+    pub fn playback_loop<M, F: Fn(MidiMsg) -> M>(
+        &self,
+        outgoing: Arc<SegQueue<M>>,
+        outgoing_func: F,
+    ) {
         let mut playback_queue = self.records.clone();
         let kickoff = Instant::now();
         while playback_queue.len() > 0 {
@@ -68,7 +72,7 @@ impl Recording {
             if Instant::now().duration_since(kickoff).as_secs_f64() > goal {
                 let (_, pn) = playback_queue.pop_front().unwrap();
                 let (deserialized, _) = MidiMsg::from_midi(&pn).unwrap();
-                outgoing.push(deserialized);
+                outgoing.push(outgoing_func(deserialized));
             }
         }
     }
