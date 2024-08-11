@@ -30,10 +30,14 @@ pub struct Recording {
 }
 
 impl Recording {
-    pub fn record_loop(
-        incoming: Arc<SegQueue<MidiMsg>>,
-        outgoing: Arc<SegQueue<MidiMsg>>,
-    ) -> Self {
+    pub fn midi_queue(&self) -> VecDeque<(f64, MidiMsg)> {
+        self.records
+            .iter()
+            .map(|(t, v)| (*t, MidiMsg::from_midi(v).unwrap().0))
+            .collect()
+    }
+
+    pub fn record_loop(incoming: Arc<SegQueue<MidiMsg>>, outgoing: Arc<SegQueue<MidiMsg>>) -> Self {
         let mut result = Self::default();
         let mut timestamp_reference = Instant::now();
         let mut first_message_received = false;
@@ -66,15 +70,14 @@ impl Recording {
         outgoing_func: F,
     ) {
         loop {
-            let mut playback_queue = self.records.clone();
+            let mut playback_queue = self.midi_queue();
             let kickoff = Instant::now();
 
             while playback_queue.len() > 0 {
                 let (goal, _) = playback_queue[0];
                 if Instant::now().duration_since(kickoff).as_secs_f64() > goal {
                     let (_, pn) = playback_queue.pop_front().unwrap();
-                    let (deserialized, _) = MidiMsg::from_midi(&pn).unwrap();
-                    outgoing.push(outgoing_func(deserialized));
+                    outgoing.push(outgoing_func(pn));
                 }
             }
 

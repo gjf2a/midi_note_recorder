@@ -7,7 +7,9 @@ use std::{
 use crossbeam_queue::SegQueue;
 use crossbeam_utils::atomic::AtomicCell;
 use midi_fundsp::{
-    io::{choose_midi_device, start_midi_input_thread, start_midi_output_thread, Speaker, SynthMsg},
+    io::{
+        choose_midi_device, start_midi_input_thread, start_midi_output_thread, Speaker, SynthMsg,
+    },
     sounds::options,
 };
 use midi_msg::MidiMsg;
@@ -28,6 +30,7 @@ fn main() -> anyhow::Result<()> {
     start_midi_output_thread::<10>(outputs.clone(), program_table.clone());
     let recording_handle = recording_thread(inputs.clone(), outputs.clone());
     input::<String>().msg("Press any key to exit\n").get();
+
     reset.store(true);
     let recording = recording_handle.join().unwrap();
     let filename = input::<String>().msg("Enter filename for recording:").get();
@@ -41,7 +44,5 @@ fn recording_thread(
     incoming: Arc<SegQueue<MidiMsg>>,
     outgoing: Arc<SegQueue<MidiMsg>>,
 ) -> JoinHandle<Recording> {
-    std::thread::spawn(move || {
-        Recording::record_loop(incoming, outgoing)
-    })
+    std::thread::spawn(move || Recording::record_loop(incoming, outgoing))
 }
