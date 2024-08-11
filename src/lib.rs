@@ -30,10 +30,9 @@ pub struct Recording {
 }
 
 impl Recording {
-    pub fn record_loop<M, F: Fn(MidiMsg) -> M>(
+    pub fn record_loop(
         incoming: Arc<SegQueue<MidiMsg>>,
-        outgoing: Arc<SegQueue<M>>,
-        outgoing_func: F,
+        outgoing: Arc<SegQueue<MidiMsg>>,
     ) -> Self {
         let mut result = Self::default();
         let mut timestamp_reference = Instant::now();
@@ -55,7 +54,7 @@ impl Recording {
                 {
                     return result;
                 }
-                outgoing.push(outgoing_func(msg))
+                outgoing.push(msg)
             }
         }
     }
