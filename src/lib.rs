@@ -20,6 +20,12 @@ pub fn note_velocity_from(msg: &MidiMsg) -> Option<(u8, u8)> {
     }
 }
 
+pub fn is_system_reset(msg: &MidiMsg) -> bool {
+    *msg == (MidiMsg::SystemRealTime {
+        msg: SystemRealTimeMsg::SystemReset,
+    })
+}
+
 pub fn seconds_since(timestamp: Instant) -> f64 {
     Instant::now().duration_since(timestamp).as_secs_f64()
 }
@@ -51,11 +57,7 @@ impl Recording {
                     result
                         .records
                         .push_back((seconds_since(timestamp_reference), msg.to_midi()));
-                } else if msg
-                    == (MidiMsg::SystemRealTime {
-                        msg: SystemRealTimeMsg::SystemReset,
-                    })
-                {
+                } else if is_system_reset(&msg) {
                     return result;
                 }
                 outgoing.push(msg)
