@@ -1,8 +1,4 @@
-use std::{
-    collections::VecDeque,
-    sync::Arc,
-    time::Instant,
-};
+use std::{collections::VecDeque, sync::Arc, time::Instant};
 
 use crossbeam_queue::SegQueue;
 use midi_msg::{MidiMsg, SystemRealTimeMsg};
