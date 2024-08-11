@@ -14,15 +14,17 @@ use midi_note_recorder::Recording;
 fn main() -> anyhow::Result<()> {
     let args = std::env::args().collect::<Vec<_>>();
     if args.len() < 2 {
-        println!("Usage: fundsp_playback_demo filename")
+        println!("Usage: fundsp_playback_demo filename [-perpetual:num_secs_delay]")
     }
+
+    let seconds_between_loops = args.iter().find(|a| a.starts_with("-perpetual")).map(|a| a.split(":").skip(1).next().unwrap().parse::<f64>().unwrap());
 
     let recording: Recording =
         serde_json::from_str(read_file_to_string(args[1].as_str())?.as_str())?;
-    let outputs = Arc::new(SegQueue::new());
+    let outgoing = Arc::new(SegQueue::new());
     let program_table = Arc::new(Mutex::new(options()));
-    start_output_thread::<10>(outputs.clone(), program_table.clone());
-    recording.playback_loop(outputs, |msg| SynthMsg {
+    start_output_thread::<10>(outgoing.clone(), program_table.clone());
+    recording.playback_loop(seconds_between_loops, outgoing, |msg| SynthMsg {
         msg,
         speaker: Speaker::Both,
     });

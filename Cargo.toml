@@ -10,7 +10,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0" 
 
 [dev-dependencies]
-midi_fundsp = "0.5.1"
+midi_fundsp = "0.5.2"
 crossbeam-utils = "0.8"
 read_input = "0.8"
 midir = "0.10"

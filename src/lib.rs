@@ -1,4 +1,4 @@
-use std::{collections::VecDeque, sync::Arc, time::Instant};
+use std::{collections::VecDeque, sync::Arc, time::{Duration, Instant}};
 
 use crossbeam_queue::SegQueue;
 use midi_msg::{MidiMsg, SystemRealTimeMsg};
@@ -58,17 +58,26 @@ impl Recording {
 
     pub fn playback_loop<M, F: Fn(MidiMsg) -> M>(
         &self,
+        seconds_between_loops: Option<f64>,
         outgoing: Arc<SegQueue<M>>,
         outgoing_func: F,
     ) {
-        let mut playback_queue = self.records.clone();
-        let kickoff = Instant::now();
-        while playback_queue.len() > 0 {
-            let (goal, _) = playback_queue[0];
-            if Instant::now().duration_since(kickoff).as_secs_f64() > goal {
-                let (_, pn) = playback_queue.pop_front().unwrap();
-                let (deserialized, _) = MidiMsg::from_midi(&pn).unwrap();
-                outgoing.push(outgoing_func(deserialized));
+        loop {
+            let mut playback_queue = self.records.clone();
+            let kickoff = Instant::now();
+
+            while playback_queue.len() > 0 {
+                let (goal, _) = playback_queue[0];
+                if Instant::now().duration_since(kickoff).as_secs_f64() > goal {
+                    let (_, pn) = playback_queue.pop_front().unwrap();
+                    let (deserialized, _) = MidiMsg::from_midi(&pn).unwrap();
+                    outgoing.push(outgoing_func(deserialized));
+                }
+            }
+
+            match seconds_between_loops {
+                None => break,
+                Some(secs) => std::thread::sleep(Duration::from_secs_f64(secs))
             }
         }
     }

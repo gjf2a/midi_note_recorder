@@ -539,9 +539,9 @@ dependencies = [
 
 [[package]]
 name = "midi_fundsp"
-version = "0.5.1"
+version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "497194586f8448fb6a546212d2722c28d76b1343a593f2d73270ba9e9cf5da52"
+checksum = "ee5ae10459629ae69cb93ae98671ab663b30446424828cfe086c9e344ec51b3f"
 dependencies = [
  "anyhow",
  "bare_metal_modulo",
