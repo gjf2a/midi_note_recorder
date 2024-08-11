@@ -1,4 +1,8 @@
-use std::{collections::VecDeque, sync::Arc, time::{Duration, Instant}};
+use std::{
+    collections::VecDeque,
+    sync::Arc,
+    time::{Duration, Instant},
+};
 
 use crossbeam_queue::SegQueue;
 use midi_msg::{MidiMsg, SystemRealTimeMsg};
@@ -77,7 +81,7 @@ impl Recording {
 
             match seconds_between_loops {
                 None => break,
-                Some(secs) => std::thread::sleep(Duration::from_secs_f64(secs))
+                Some(secs) => std::thread::sleep(Duration::from_secs_f64(secs)),
             }
         }
     }

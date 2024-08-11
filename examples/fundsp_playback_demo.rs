@@ -17,7 +17,10 @@ fn main() -> anyhow::Result<()> {
         println!("Usage: fundsp_playback_demo filename [-perpetual:num_secs_delay]")
     }
 
-    let seconds_between_loops = args.iter().find(|a| a.starts_with("-perpetual")).map(|a| a.split(":").skip(1).next().unwrap().parse::<f64>().unwrap());
+    let seconds_between_loops = args
+        .iter()
+        .find(|a| a.starts_with("-perpetual"))
+        .map(|a| a.split(":").skip(1).next().unwrap().parse::<f64>().unwrap());
 
     let recording: Recording =
         serde_json::from_str(read_file_to_string(args[1].as_str())?.as_str())?;
