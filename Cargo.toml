@@ -1,13 +1,13 @@
 [package]
 name = "midi_note_recorder"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 
 [dependencies]
 midi-msg = "0.7.1"
 crossbeam-queue = "0.3"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0" 
+serde = { version = "1.0.208", features = ["derive"] }
+serde_json = "1.0.125" 
 
 [dev-dependencies]
 midi_fundsp = "0.5.2"

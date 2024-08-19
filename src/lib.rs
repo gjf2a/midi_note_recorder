@@ -5,7 +5,7 @@ use std::{
 };
 
 use crossbeam_queue::SegQueue;
-use midi_msg::{MidiMsg, SystemRealTimeMsg};
+use midi_msg::{Channel, MidiMsg, SystemRealTimeMsg};
 use serde::{Deserialize, Serialize};
 
 pub fn note_velocity_from(msg: &MidiMsg) -> Option<(u8, u8)> {
@@ -17,6 +17,17 @@ pub fn note_velocity_from(msg: &MidiMsg) -> Option<(u8, u8)> {
         }
     } else {
         None
+    }
+}
+
+pub fn midi_msg_from(channel: Channel, note: u8, velocity: u8) -> MidiMsg {
+    MidiMsg::ChannelVoice {
+        channel,
+        msg: if velocity == 0 {
+            midi_msg::ChannelVoiceMsg::NoteOff { note, velocity }
+        } else {
+            midi_msg::ChannelVoiceMsg::NoteOn { note, velocity }
+        },
     }
 }
 

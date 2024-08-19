@@ -7,9 +7,7 @@ use std::{
 use crossbeam_queue::SegQueue;
 use crossbeam_utils::atomic::AtomicCell;
 use midi_fundsp::{
-    io::{
-        choose_midi_device, start_midi_input_thread, start_midi_output_thread, Speaker, SynthMsg,
-    },
+    io::{choose_midi_device, start_midi_input_thread, start_midi_output_thread},
     sounds::options,
 };
 use midi_msg::MidiMsg;
