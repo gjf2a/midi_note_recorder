@@ -1,5 +1,7 @@
 use std::{
     collections::VecDeque,
+    fs::File,
+    io::Read,
     sync::Arc,
     time::{Duration, Instant},
 };
@@ -47,6 +49,14 @@ pub struct Recording {
 }
 
 impl Recording {
+    pub fn from_file(filename: &str) -> anyhow::Result<Self> {
+        Self::from_string(read_file_to_string(filename)?.as_str())
+    }
+
+    pub fn from_string(s: &str) -> anyhow::Result<Self> {
+        Ok(serde_json::from_str(s)?)
+    }
+
     pub fn midi_queue(&self) -> VecDeque<(f64, MidiMsg)> {
         self.records
             .iter()
@@ -100,4 +110,11 @@ impl Recording {
             }
         }
     }
+}
+
+fn read_file_to_string(filename: &str) -> anyhow::Result<String> {
+    let mut file = File::open(filename)?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)?;
+    Ok(contents)
 }

@@ -1,8 +1,4 @@
-use std::{
-    fs::File,
-    io::Read,
-    sync::{Arc, Mutex},
-};
+use std::sync::{Arc, Mutex};
 
 use crossbeam_queue::SegQueue;
 use midi_fundsp::{
@@ -22,8 +18,7 @@ fn main() -> anyhow::Result<()> {
         .find(|a| a.starts_with("-perpetual"))
         .map(|a| a.split(":").skip(1).next().unwrap().parse::<f64>().unwrap());
 
-    let recording: Recording =
-        serde_json::from_str(read_file_to_string(args[1].as_str())?.as_str())?;
+    let recording: Recording = Recording::from_file(args[1].as_str())?;
     let outgoing = Arc::new(SegQueue::new());
     let program_table = Arc::new(Mutex::new(options()));
     start_output_thread::<10>(outgoing.clone(), program_table.clone());
@@ -32,11 +27,4 @@ fn main() -> anyhow::Result<()> {
         speaker: Speaker::Both,
     });
     Ok(())
-}
-
-fn read_file_to_string(filename: &str) -> anyhow::Result<String> {
-    let mut file = File::open(filename)?;
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)?;
-    Ok(contents)
 }
