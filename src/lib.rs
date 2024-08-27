@@ -9,6 +9,7 @@ use std::{
 use crossbeam_queue::SegQueue;
 use midi_msg::{Channel, MidiMsg, SystemRealTimeMsg};
 use serde::{Deserialize, Serialize};
+use std::io::Write;
 
 pub fn note_velocity_from(msg: &MidiMsg) -> Option<(u8, u8)> {
     if let MidiMsg::ChannelVoice { channel: _, msg } = msg {
@@ -55,6 +56,12 @@ impl Recording {
 
     pub fn from_string(s: &str) -> anyhow::Result<Self> {
         Ok(serde_json::from_str(s)?)
+    }
+
+    pub fn to_file(&self, filename: &str) -> anyhow::Result<()> {
+        let mut file = File::create(filename)?;
+        writeln!(file, "{}", serde_json::to_string(self)?)?;
+        Ok(())
     }
 
     pub fn midi_queue(&self) -> VecDeque<(f64, MidiMsg)> {

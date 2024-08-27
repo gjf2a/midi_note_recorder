@@ -1,5 +1,4 @@
 use std::{
-    fs::File,
     sync::{Arc, Mutex},
     thread::JoinHandle,
 };
@@ -14,7 +13,6 @@ use midi_msg::MidiMsg;
 use midi_note_recorder::Recording;
 use midir::MidiInput;
 use read_input::{shortcut::input, InputBuild};
-use std::io::Write;
 
 fn main() -> anyhow::Result<()> {
     let reset = Arc::new(AtomicCell::new(false));
@@ -32,8 +30,7 @@ fn main() -> anyhow::Result<()> {
     reset.store(true);
     let recording = recording_handle.join().unwrap();
     let filename = input::<String>().msg("Enter filename for recording:").get();
-    let mut file = File::create(filename)?;
-    writeln!(file, "{}", serde_json::to_string(&recording)?)?;
+    recording.to_file(filename.as_str())?;
     println!("File written; exiting...");
     Ok(())
 }
