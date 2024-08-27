@@ -45,7 +45,7 @@ pub fn seconds_since(timestamp: Instant) -> f64 {
 
 #[derive(Serialize, Deserialize, Default, Debug, Clone, PartialEq)]
 pub struct Recording {
-    records: VecDeque<(f64, Vec<u8>)>,
+    records: Vec<(f64, Vec<u8>)>,
 }
 
 impl Recording {
@@ -64,6 +64,11 @@ impl Recording {
             .collect()
     }
 
+    pub fn add_message(&mut self, time: f64, msg: &MidiMsg) {
+        assert!(self.records.len() == 0 || self.records.last().unwrap().0 < time);
+        self.records.push((time, msg.to_midi()));
+    }
+
     pub fn record_loop(incoming: Arc<SegQueue<MidiMsg>>, outgoing: Arc<SegQueue<MidiMsg>>) -> Self {
         let mut result = Self::default();
         let mut timestamp_reference = Instant::now();
@@ -75,9 +80,7 @@ impl Recording {
                         timestamp_reference = Instant::now();
                         first_message_received = true;
                     }
-                    result
-                        .records
-                        .push_back((seconds_since(timestamp_reference), msg.to_midi()));
+                    result.add_message(seconds_since(timestamp_reference), &msg);
                 } else if is_system_reset(&msg) {
                     return result;
                 }
