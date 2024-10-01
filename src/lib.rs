@@ -58,6 +58,14 @@ impl Recording {
         Ok(serde_json::from_str(s)?)
     }
 
+    pub fn from_sequence<S: AsRef<[(f64, MidiMsg)]>>(seq: S) -> Self {
+        let mut result = Self::default();
+        for (time, msg) in seq.as_ref() {
+            result.add_message(*time, msg);
+        }
+        result
+    }
+
     pub fn to_file(&self, filename: &str) -> anyhow::Result<()> {
         let mut file = File::create(filename)?;
         writeln!(file, "{}", serde_json::to_string(self)?)?;
@@ -127,4 +135,22 @@ fn read_file_to_string(filename: &str) -> anyhow::Result<String> {
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
     Ok(contents)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{read_file_to_string, Recording};
+
+    #[test]
+    fn test_ascending_timestamps() {
+        let testee: Recording = serde_json::from_str(read_file_to_string("lean_on_me").unwrap().as_str()).unwrap();
+        let mut queue = testee.midi_queue();
+        let mut prev = None;
+        while let Some((t, _)) = queue.pop_front() {
+            if let Some(prev_time) = prev {
+                assert!(prev_time < t);
+            }
+            prev = Some(t);
+        }
+    }
 }

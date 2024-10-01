@@ -11,7 +11,7 @@ fn main() -> anyhow::Result<()> {
         serde_json::from_str(read_file_to_string(args[1].as_str())?.as_str())?;
     for (t, msg) in recording.midi_queue() {
         if let Some((n, v)) = note_velocity_from(&msg) {
-            println!("{t:.3}\t{n:>4}\t{v:>4}");
+            println!("{t:7.3}\t{n:>4}\t{v:>4}");
         }
     }
     Ok(())
