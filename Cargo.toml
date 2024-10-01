@@ -1,6 +1,6 @@
 [package]
 name = "midi_note_recorder"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 
 [dependencies]
@@ -11,7 +11,7 @@ serde_json = "1"
 anyhow = "1"
 
 [dev-dependencies]
-midi_fundsp = "0.5.2"
+midi_fundsp = "0.5.3"
 crossbeam-utils = "0.8"
 read_input = "0.8"
 midir = "0.10"
