@@ -115,7 +115,12 @@ impl Recording {
             let kickoff = Instant::now();
 
             while playback_queue.len() > 0 {
-                check_play_next_note(&mut playback_queue, kickoff, outgoing.clone(), &outgoing_func);
+                check_play_next_note(
+                    &mut playback_queue,
+                    kickoff,
+                    outgoing.clone(),
+                    &outgoing_func,
+                );
             }
 
             match seconds_between_loops {
@@ -126,21 +131,28 @@ impl Recording {
     }
 }
 
-
-
-fn check_play_next_note<M, F: Fn(MidiMsg) -> M>(note_queue: &mut VecDeque<(f64, MidiMsg)>, start_time: Instant,
+fn check_play_next_note<M, F: Fn(MidiMsg) -> M>(
+    note_queue: &mut VecDeque<(f64, MidiMsg)>,
+    start_time: Instant,
     outgoing: Arc<SegQueue<M>>,
-    outgoing_func: &F) {
-        if note_queue.len() > 0 {
-            let (goal, _) = note_queue[0];
-            if Instant::now().duration_since(start_time).as_secs_f64() > goal {
-                let (_, note) = note_queue.pop_front().unwrap();
-                outgoing.push(outgoing_func(note));
-            }
+    outgoing_func: &F,
+) {
+    if note_queue.len() > 0 {
+        let (goal, _) = note_queue[0];
+        if Instant::now().duration_since(start_time).as_secs_f64() > goal {
+            let (_, note) = note_queue.pop_front().unwrap();
+            outgoing.push(outgoing_func(note));
         }
+    }
 }
 
-pub fn stereo_playback<M, L: Fn(MidiMsg) -> M, R: Fn(MidiMsg) -> M>(left: &Recording, right: &Recording, outgoing: Arc<SegQueue<M>>, left_msg: L, right_msg: R) {
+pub fn stereo_playback<M, L: Fn(MidiMsg) -> M, R: Fn(MidiMsg) -> M>(
+    left: &Recording,
+    right: &Recording,
+    outgoing: Arc<SegQueue<M>>,
+    left_msg: L,
+    right_msg: R,
+) {
     loop {
         let mut left_queue = left.midi_queue();
         let mut right_queue = right.midi_queue();
@@ -166,7 +178,8 @@ mod tests {
 
     #[test]
     fn test_ascending_timestamps() {
-        let testee: Recording = serde_json::from_str(read_file_to_string("lean_on_me").unwrap().as_str()).unwrap();
+        let testee: Recording =
+            serde_json::from_str(read_file_to_string("lean_on_me").unwrap().as_str()).unwrap();
         let mut queue = testee.midi_queue();
         let mut prev = None;
         while let Some((t, _)) = queue.pop_front() {
