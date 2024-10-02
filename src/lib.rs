@@ -115,17 +115,40 @@ impl Recording {
             let kickoff = Instant::now();
 
             while playback_queue.len() > 0 {
-                let (goal, _) = playback_queue[0];
-                if Instant::now().duration_since(kickoff).as_secs_f64() > goal {
-                    let (_, pn) = playback_queue.pop_front().unwrap();
-                    outgoing.push(outgoing_func(pn));
-                }
+                check_play_next_note(&mut playback_queue, kickoff, outgoing.clone(), &outgoing_func);
             }
 
             match seconds_between_loops {
                 None => break,
                 Some(secs) => std::thread::sleep(Duration::from_secs_f64(secs)),
             }
+        }
+    }
+}
+
+
+
+fn check_play_next_note<M, F: Fn(MidiMsg) -> M>(note_queue: &mut VecDeque<(f64, MidiMsg)>, start_time: Instant,
+    outgoing: Arc<SegQueue<M>>,
+    outgoing_func: &F) {
+        if note_queue.len() > 0 {
+            let (goal, _) = note_queue[0];
+            if Instant::now().duration_since(start_time).as_secs_f64() > goal {
+                let (_, note) = note_queue.pop_front().unwrap();
+                outgoing.push(outgoing_func(note));
+            }
+        }
+}
+
+pub fn stereo_playback<M, L: Fn(MidiMsg) -> M, R: Fn(MidiMsg) -> M>(left: &Recording, right: &Recording, outgoing: Arc<SegQueue<M>>, left_msg: L, right_msg: R) {
+    loop {
+        let mut left_queue = left.midi_queue();
+        let mut right_queue = right.midi_queue();
+        let start_time = Instant::now();
+
+        while left_queue.len() + right_queue.len() > 0 {
+            check_play_next_note(&mut left_queue, start_time, outgoing.clone(), &left_msg);
+            check_play_next_note(&mut right_queue, start_time, outgoing.clone(), &right_msg);
         }
     }
 }

@@ -544,7 +544,7 @@ dependencies = [
 
 [[package]]
 name = "midi_note_recorder"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "anyhow",
  "crossbeam-queue",
