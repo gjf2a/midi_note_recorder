@@ -153,15 +153,13 @@ pub fn stereo_playback<M, L: Fn(MidiMsg) -> M, R: Fn(MidiMsg) -> M>(
     left_msg: L,
     right_msg: R,
 ) {
-    loop {
-        let mut left_queue = left.midi_queue();
-        let mut right_queue = right.midi_queue();
-        let start_time = Instant::now();
+    let mut left_queue = left.midi_queue();
+    let mut right_queue = right.midi_queue();
+    let start_time = Instant::now();
 
-        while left_queue.len() + right_queue.len() > 0 {
-            check_play_next_note(&mut left_queue, start_time, outgoing.clone(), &left_msg);
-            check_play_next_note(&mut right_queue, start_time, outgoing.clone(), &right_msg);
-        }
+    while left_queue.len() + right_queue.len() > 0 {
+        check_play_next_note(&mut left_queue, start_time, outgoing.clone(), &left_msg);
+        check_play_next_note(&mut right_queue, start_time, outgoing.clone(), &right_msg);
     }
 }
 
