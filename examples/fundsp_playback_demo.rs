@@ -11,20 +11,20 @@ fn main() -> anyhow::Result<()> {
     let args = std::env::args().collect::<Vec<_>>();
     if args.len() < 2 {
         println!("Usage: fundsp_playback_demo filename [-perpetual:num_secs_delay]")
+    } else {
+        let seconds_between_loops = args
+            .iter()
+            .find(|a| a.starts_with("-perpetual"))
+            .map(|a| a.split(":").skip(1).next().unwrap().parse::<f64>().unwrap());
+
+        let recording: Recording = Recording::from_file(args[1].as_str())?;
+        let outgoing = Arc::new(SegQueue::new());
+        let program_table = Arc::new(Mutex::new(options()));
+        start_output_thread::<10>(outgoing.clone(), program_table.clone());
+        recording.playback_loop(seconds_between_loops, outgoing, |msg| SynthMsg {
+            msg,
+            speaker: Speaker::Both,
+        });
     }
-
-    let seconds_between_loops = args
-        .iter()
-        .find(|a| a.starts_with("-perpetual"))
-        .map(|a| a.split(":").skip(1).next().unwrap().parse::<f64>().unwrap());
-
-    let recording: Recording = Recording::from_file(args[1].as_str())?;
-    let outgoing = Arc::new(SegQueue::new());
-    let program_table = Arc::new(Mutex::new(options()));
-    start_output_thread::<10>(outgoing.clone(), program_table.clone());
-    recording.playback_loop(seconds_between_loops, outgoing, |msg| SynthMsg {
-        msg,
-        speaker: Speaker::Both,
-    });
     Ok(())
 }
