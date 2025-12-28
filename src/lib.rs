@@ -79,6 +79,10 @@ impl Recording {
             .collect()
     }
 
+    pub fn duration(&self) -> f64 {
+        self.records.last().map(|(t, _)| *t).unwrap()
+    }
+
     pub fn add_message(&mut self, time: f64, msg: &MidiMsg) {
         assert!(self.records.len() == 0 || self.records.last().unwrap().0 < time);
         self.records.push((time, msg.to_midi()));
