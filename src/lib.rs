@@ -7,21 +7,10 @@ use std::{
 };
 
 use crossbeam_queue::SegQueue;
+use midi_fundsp::note_velocity_from;
 use midi_msg::{Channel, MidiMsg, SystemRealTimeMsg};
 use serde::{Deserialize, Serialize};
 use std::io::Write;
-
-pub fn note_velocity_from(msg: &MidiMsg) -> Option<(u8, u8)> {
-    if let MidiMsg::ChannelVoice { channel: _, msg } = msg {
-        match msg {
-            midi_msg::ChannelVoiceMsg::NoteOn { note, velocity }
-            | midi_msg::ChannelVoiceMsg::NoteOff { note, velocity } => Some((*note, *velocity)),
-            _ => None,
-        }
-    } else {
-        None
-    }
-}
 
 pub fn midi_msg_from(channel: Channel, note: u8, velocity: u8) -> MidiMsg {
     MidiMsg::ChannelVoice {
