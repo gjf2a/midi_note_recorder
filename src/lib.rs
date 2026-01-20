@@ -70,6 +70,10 @@ impl Recording {
         self.records.len()
     }
 
+    pub fn clear(&mut self) {
+        self.records.clear();
+    }
+
     pub fn to_file(&self, filename: &str) -> anyhow::Result<()> {
         let mut file = File::create(filename)?;
         writeln!(file, "{}", serde_json::to_string(self)?)?;
