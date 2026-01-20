@@ -2,7 +2,7 @@ use std::sync::{Arc, Mutex};
 
 use crossbeam_queue::SegQueue;
 use midi_fundsp::{
-    io::{start_output_thread, Speaker, SynthMsg},
+    io::{Speaker, SynthMsg, start_output_thread},
     sounds::options,
 };
 use midi_note_recorder::Recording;

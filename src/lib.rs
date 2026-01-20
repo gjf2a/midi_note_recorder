@@ -180,7 +180,7 @@ fn read_file_to_string(filename: &str) -> anyhow::Result<String> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{read_file_to_string, Recording};
+    use crate::{Recording, read_file_to_string};
 
     #[test]
     fn test_ascending_timestamps() {

@@ -12,7 +12,7 @@ use midi_fundsp::{
 use midi_msg::MidiMsg;
 use midi_note_recorder::Recording;
 use midir::MidiInput;
-use read_input::{shortcut::input, InputBuild};
+use read_input::{InputBuild, shortcut::input};
 
 fn main() -> anyhow::Result<()> {
     let reset = Arc::new(AtomicCell::new(false));

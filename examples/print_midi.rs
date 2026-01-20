@@ -1,6 +1,6 @@
 use std::{fs::File, io::Read};
 
-use midi_note_recorder::{note_velocity_from, Recording};
+use midi_note_recorder::{Recording, note_velocity_from};
 
 fn main() -> anyhow::Result<()> {
     let args = std::env::args().collect::<Vec<_>>();
