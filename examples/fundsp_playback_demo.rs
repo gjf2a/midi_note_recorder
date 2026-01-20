@@ -22,7 +22,7 @@ fn main() -> anyhow::Result<()> {
         let outgoing = Arc::new(SegQueue::new());
         let program_table = Arc::new(Mutex::new(options()));
         start_output_thread::<10>(outgoing.clone(), program_table.clone());
-        let playback_progress = Arc::new(AtomicCell::new(0.0));
+        let playback_progress = Arc::new(AtomicCell::new(None));
         recording.playback_loop(
             seconds_between_loops,
             outgoing,

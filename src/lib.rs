@@ -117,7 +117,7 @@ impl Recording {
         seconds_between_loops: Option<f64>,
         outgoing: Arc<SegQueue<M>>,
         outgoing_func: F,
-        playback_progress: Arc<AtomicCell<f64>>,
+        playback_progress: Arc<AtomicCell<Option<f64>>>,
     ) {
         loop {
             let mut playback_queue = self.midi_queue();
@@ -146,16 +146,18 @@ fn check_play_next_note<M, F: Fn(MidiMsg) -> M>(
     start_time: Instant,
     outgoing: Arc<SegQueue<M>>,
     outgoing_func: &F,
-    playback_progress: Arc<AtomicCell<f64>>,
+    playback_progress: Arc<AtomicCell<Option<f64>>>,
 ) {
     if note_queue.len() > 0 {
         let (goal, _) = note_queue[0];
         let progress = Instant::now().duration_since(start_time).as_secs_f64();
-        playback_progress.store(progress);
+        playback_progress.store(Some(progress));
         if progress > goal {
             let (_, note) = note_queue.pop_front().unwrap();
             outgoing.push(outgoing_func(note));
         }
+    } else {
+        playback_progress.store(None);
     }
 }
 
@@ -165,7 +167,7 @@ pub fn stereo_playback<M, L: Fn(MidiMsg) -> M, R: Fn(MidiMsg) -> M>(
     outgoing: Arc<SegQueue<M>>,
     left_msg: L,
     right_msg: R,
-    playback_progress: Arc<AtomicCell<f64>>,
+    playback_progress: Arc<AtomicCell<Option<f64>>>,
 ) {
     let mut left_queue = left.midi_queue();
     let mut right_queue = right.midi_queue();
