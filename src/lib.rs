@@ -66,6 +66,10 @@ impl Recording {
         result
     }
 
+    pub fn len(&self) -> usize {
+        self.records.len()
+    }
+
     pub fn to_file(&self, filename: &str) -> anyhow::Result<()> {
         let mut file = File::create(filename)?;
         writeln!(file, "{}", serde_json::to_string(self)?)?;
