@@ -66,6 +66,12 @@ impl Recording {
         result
     }
 
+    pub fn last(&self) -> Option<(f64, MidiMsg)> {
+        self.records
+            .last()
+            .map(|(t, m)| (*t, MidiMsg::from_midi(m).unwrap().0))
+    }
+
     pub fn len(&self) -> usize {
         self.records.len()
     }
