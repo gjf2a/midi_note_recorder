@@ -7,6 +7,7 @@ use std::{
 };
 
 use crossbeam_queue::SegQueue;
+use crossbeam_utils::atomic::AtomicCell;
 use midi_fundsp::note_velocity_from;
 use midi_msg::{Channel, MidiMsg, SystemRealTimeMsg};
 use serde::{Deserialize, Serialize};
@@ -116,6 +117,7 @@ impl Recording {
         seconds_between_loops: Option<f64>,
         outgoing: Arc<SegQueue<M>>,
         outgoing_func: F,
+        playback_progress: Arc<AtomicCell<f64>>,
     ) {
         loop {
             let mut playback_queue = self.midi_queue();
@@ -127,6 +129,7 @@ impl Recording {
                     kickoff,
                     outgoing.clone(),
                     &outgoing_func,
+                    playback_progress.clone(),
                 );
             }
 
@@ -143,10 +146,13 @@ fn check_play_next_note<M, F: Fn(MidiMsg) -> M>(
     start_time: Instant,
     outgoing: Arc<SegQueue<M>>,
     outgoing_func: &F,
+    playback_progress: Arc<AtomicCell<f64>>,
 ) {
     if note_queue.len() > 0 {
         let (goal, _) = note_queue[0];
-        if Instant::now().duration_since(start_time).as_secs_f64() > goal {
+        let progress = Instant::now().duration_since(start_time).as_secs_f64();
+        playback_progress.store(progress);
+        if progress > goal {
             let (_, note) = note_queue.pop_front().unwrap();
             outgoing.push(outgoing_func(note));
         }
@@ -159,14 +165,27 @@ pub fn stereo_playback<M, L: Fn(MidiMsg) -> M, R: Fn(MidiMsg) -> M>(
     outgoing: Arc<SegQueue<M>>,
     left_msg: L,
     right_msg: R,
+    playback_progress: Arc<AtomicCell<f64>>,
 ) {
     let mut left_queue = left.midi_queue();
     let mut right_queue = right.midi_queue();
     let start_time = Instant::now();
 
     while left_queue.len() + right_queue.len() > 0 {
-        check_play_next_note(&mut left_queue, start_time, outgoing.clone(), &left_msg);
-        check_play_next_note(&mut right_queue, start_time, outgoing.clone(), &right_msg);
+        check_play_next_note(
+            &mut left_queue,
+            start_time,
+            outgoing.clone(),
+            &left_msg,
+            playback_progress.clone(),
+        );
+        check_play_next_note(
+            &mut right_queue,
+            start_time,
+            outgoing.clone(),
+            &right_msg,
+            playback_progress.clone(),
+        );
     }
 }
 

@@ -1,6 +1,7 @@
 use std::sync::{Arc, Mutex};
 
 use crossbeam_queue::SegQueue;
+use crossbeam_utils::atomic::AtomicCell;
 use midi_fundsp::{
     io::{Speaker, SynthMsg, start_output_thread},
     sounds::options,
@@ -21,10 +22,16 @@ fn main() -> anyhow::Result<()> {
         let outgoing = Arc::new(SegQueue::new());
         let program_table = Arc::new(Mutex::new(options()));
         start_output_thread::<10>(outgoing.clone(), program_table.clone());
-        recording.playback_loop(seconds_between_loops, outgoing, |msg| SynthMsg {
-            msg,
-            speaker: Speaker::Both,
-        });
+        let playback_progress = Arc::new(AtomicCell::new(0.0));
+        recording.playback_loop(
+            seconds_between_loops,
+            outgoing,
+            |msg| SynthMsg {
+                msg,
+                speaker: Speaker::Both,
+            },
+            playback_progress.clone(),
+        );
     }
     Ok(())
 }
