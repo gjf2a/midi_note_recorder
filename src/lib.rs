@@ -48,14 +48,6 @@ impl Recording {
         Ok(serde_json::from_str(s)?)
     }
 
-    pub fn from_sequence<S: AsRef<[(f64, MidiMsg)]>>(seq: &S) -> Self {
-        let mut result = Self::default();
-        for (time, msg) in seq.as_ref() {
-            result.add_message(*time, msg);
-        }
-        result
-    }
-
     pub fn last(&self) -> Option<(f64, MidiMsg)> {
         self.records
             .last()
