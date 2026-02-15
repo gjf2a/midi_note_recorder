@@ -117,7 +117,8 @@ impl Recording {
             let kickoff = Instant::now();
 
             while playback_queue.len() > 0 {
-                println!("{}", playback_queue.len());
+                let current = Instant::now().duration_since(kickoff).as_secs_f64();
+                println!("{} {current:.2} {:.2}", playback_queue.len(), playback_queue[0].0 - current);
                 check_play_next_note(
                     &mut playback_queue,
                     kickoff,
