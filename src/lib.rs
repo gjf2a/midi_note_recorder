@@ -115,15 +115,15 @@ impl Recording {
             let mut playback_queue = self.midi_queue();
             println!("playback_queue: {playback_queue:?}");
             let kickoff = Instant::now();
-            let mut prev = String::new();
+            let mut prev = playback_queue.len();
 
             while playback_queue.len() > 0 {
                 let current = Instant::now().duration_since(kickoff).as_secs_f64();
                 let current_str = format!("{} {current:.2} {:.2}", playback_queue.len(), playback_queue[0].0 - current);
-                if current_str != prev {
+                if playback_queue.len() != prev {
                     println!("{current_str}");
+                    prev = playback_queue.len();
                 }
-                prev = current_str;
                 check_play_next_note(
                     &mut playback_queue,
                     kickoff,
