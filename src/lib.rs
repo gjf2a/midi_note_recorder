@@ -113,9 +113,11 @@ impl Recording {
     ) {
         loop {
             let mut playback_queue = self.midi_queue();
+            println!("playback_queue: {playback_queue:?}");
             let kickoff = Instant::now();
 
             while playback_queue.len() > 0 {
+                println!("{}", playback_queue.len());
                 check_play_next_note(
                     &mut playback_queue,
                     kickoff,
