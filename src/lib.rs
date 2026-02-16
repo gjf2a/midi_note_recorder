@@ -14,6 +14,7 @@ use serde::{Deserialize, Serialize};
 use std::io::Write;
 
 pub type Timestamp = f64;
+pub type TotalDuration = f64;
 
 pub fn midi_msg_from(channel: Channel, note: u8, velocity: u8) -> MidiMsg {
     MidiMsg::ChannelVoice {
@@ -77,7 +78,7 @@ impl Recording {
             .collect()
     }
 
-    pub fn duration(&self) -> f64 {
+    pub fn duration(&self) -> TotalDuration {
         self.records.last().map(|(t, _)| *t).unwrap()
     }
 
