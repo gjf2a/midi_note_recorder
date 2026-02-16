@@ -13,6 +13,8 @@ use midi_msg::{Channel, MidiMsg, SystemRealTimeMsg};
 use serde::{Deserialize, Serialize};
 use std::io::Write;
 
+pub type Timestamp = f64;
+
 pub fn midi_msg_from(channel: Channel, note: u8, velocity: u8) -> MidiMsg {
     MidiMsg::ChannelVoice {
         channel,
@@ -36,7 +38,7 @@ pub fn seconds_since(timestamp: Instant) -> f64 {
 
 #[derive(Serialize, Deserialize, Default, Debug, Clone, PartialEq)]
 pub struct Recording {
-    records: Vec<(f64, Vec<u8>)>,
+    records: Vec<(Timestamp, Vec<u8>)>,
 }
 
 impl Recording {
@@ -48,7 +50,7 @@ impl Recording {
         Ok(serde_json::from_str(s)?)
     }
 
-    pub fn last(&self) -> Option<(f64, MidiMsg)> {
+    pub fn last(&self) -> Option<(Timestamp, MidiMsg)> {
         self.records
             .last()
             .map(|(t, m)| (*t, MidiMsg::from_midi(m).unwrap().0))
@@ -68,7 +70,7 @@ impl Recording {
         Ok(())
     }
 
-    pub fn midi_queue(&self) -> VecDeque<(f64, MidiMsg)> {
+    pub fn midi_queue(&self) -> VecDeque<(Timestamp, MidiMsg)> {
         self.records
             .iter()
             .map(|(t, v)| (*t, MidiMsg::from_midi(v).unwrap().0))
@@ -79,7 +81,7 @@ impl Recording {
         self.records.last().map(|(t, _)| *t).unwrap()
     }
 
-    pub fn add_message(&mut self, time: f64, msg: &MidiMsg) {
+    pub fn add_message(&mut self, time: Timestamp, msg: &MidiMsg) {
         assert!(self.records.len() == 0 || self.records.last().unwrap().0 < time);
         self.records.push((time, msg.to_midi()));
     }
@@ -142,7 +144,7 @@ impl Recording {
 }
 
 fn check_play_next_note<M, F: Fn(MidiMsg) -> M>(
-    note_queue: &mut VecDeque<(f64, MidiMsg)>,
+    note_queue: &mut VecDeque<(Timestamp, MidiMsg)>,
     start_time: Instant,
     outgoing: Arc<SegQueue<M>>,
     outgoing_func: &F,
